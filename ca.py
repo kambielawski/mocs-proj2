@@ -20,6 +20,12 @@ cell_types = np.zeros((N,N))
 cell_types[(N//2)-BODY_SIZE : (N//2)+BODY_SIZE, (N//2)-BODY_SIZE : (N//2)+BODY_SIZE] = HEALTHY_CELL
 cell_types[N//2, N//2] = CANCER_CELL
 
+def num_healthy_cells(grid):
+    return sum(row.count(HEALTHY_CELL) for row in grid)
+
+def num_cancer_cells(grid):
+    return sum(row.count(CANCER_CELL) for row in grid)
+
 # cell_strengths = np.zeros((N,N))
 # cell_types[N//2, N//2] = 1
 
