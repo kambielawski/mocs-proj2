@@ -105,7 +105,7 @@ def run_trial(levy=False, gravity=False):
     dla = initialize()
     for i in range(ITERATIONS):
         random_walk(dla, i + 2, levy, gravity)
-    save_image(dla, 'dla_0_0.png')
+    save_image(dla, f'dla_{levy:d}_{gravity:d}.png')
     elapsed = perf_counter() - start_time
     dimensionality = compute_dimensionality(dla)
     return elapsed, dimensionality
