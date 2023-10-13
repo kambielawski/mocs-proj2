@@ -3,6 +3,7 @@ import math
 import random
 from time import perf_counter
 
+from sklearn.linear_model import LinearRegression
 from matplotlib import colors
 import matplotlib.pyplot as plt
 import numpy as np
@@ -57,27 +58,45 @@ def random_walk(dla, value, levy=False, gravity=False):
                 return
 
 
-def compute_dimensionality(dla):
-    # TODO: try a bunch of different box lengths.
-    box_length = 4
+def compute_dimensionality(dla):   
+    image = plt.imread(dla)
 
-    # Finding all the non-zero pixels
-    pixels = []
-    for i in range(WORLD_SIZE):
-        for j in range(WORLD_SIZE):
-            if dla[i, j] > 0:
-                pixels.append((i, j))
-    pixels = np.array(pixels)
-    bins = np.arange(0, WORLD_SIZE, box_length)
-    # Count number of boxes that contain at least 1 non-zero pixel
-    # TODO: This should be equivalent to what was here before, but I'm getting
-    # an error about dimensions not matching, so something's not right.
-    H, _ = np.histogramdd(dla > 0, bins=(bins, bins))
-    N = np.sum(H > 0)
+    # Initialize lists to store the log of box sizes and log of box counts
+    box_lengths = [1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100]
+    log_box_sizes = np.log(box_lengths)
+    log_box_counts = []
 
-    # Calculate the fractal dimension where N = box_count
-    dimensions = np.log(N) / np.log(box_length)
-    return dimensions
+    # for each box_length in the list, count the number of boxes needed to cover the structure
+    for box_length in box_lengths:
+        box_count = 0
+
+        # For each row and each column, move from index 0 to index[box_length] in intervals of box_length
+        for x in range(0, image.shape[0], box_length):
+            for y in range(0, image.shape[1], box_length):
+
+                # If the box_length by box_length area contains a nonzero element, add 1 to box count
+                if np.any(image[x:x+box_length, y:y+box_length]):
+                    box_count += 1
+
+        log_box_counts.append(np.log(box_count))
+
+    # Perform linear regression on the log-log data
+    x = np.array(log_box_sizes).reshape(-1,1)
+    y = np.array(log_box_counts)
+    model = LinearRegression().fit(x, y)
+    estimated_dimension = -model.coef_[0]
+
+    # Plot box_count as a function of box_length in log-log space
+    plt.scatter(log_box_sizes, log_box_counts, label=None)
+    plt.plot(log_box_sizes, model.predict(x), color='purple', label="Linear Fit")
+    plt.xlabel('Log(Box Size)')
+    plt.ylabel('Log(Box Count)')
+    plt.legend()
+    plt.title('')
+    plt.grid(True)
+    plt.show()
+
+    return estimated_dimension
 
 
 def initialize():
