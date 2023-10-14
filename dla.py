@@ -63,7 +63,7 @@ def compute_dimensionality(dla):
 
     # Initialize lists to store the log of box sizes and log of box counts
     box_lengths = [1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100]
-    log_box_sizes = np.log(box_lengths)
+    log_box_lengths = np.log(box_lengths)
     log_box_counts = []
 
     # for each box_length in the list, count the number of boxes needed to cover the structure
@@ -81,14 +81,14 @@ def compute_dimensionality(dla):
         log_box_counts.append(np.log(box_count))
 
     # Perform linear regression on the log-log data
-    x = np.array(log_box_sizes).reshape(-1,1)
+    x = np.array(log_box_lengths).reshape(-1,1)
     y = np.array(log_box_counts)
     model = LinearRegression().fit(x, y)
     estimated_dimension = -model.coef_[0]
 
     # Plot box_count as a function of box_length in log-log space
-    plt.scatter(log_box_sizes, log_box_counts, label=None)
-    plt.plot(log_box_sizes, model.predict(x), color='purple', label="Linear Fit")
+    plt.scatter(log_box_lengths, log_box_counts, label=None)
+    plt.plot(log_box_lengths, model.predict(x), color='purple', label="Linear Fit")
     plt.xlabel('Log(Box Size)')
     plt.ylabel('Log(Box Count)')
     plt.legend()
