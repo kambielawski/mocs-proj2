@@ -3,19 +3,19 @@ import math
 import random
 from time import perf_counter
 
-from sklearn.linear_model import LinearRegression
 from matplotlib import colors
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.linear_model import LinearRegression
 
 WORLD_SIZE = 128
 MIDDLE = WORLD_SIZE // 2
-ITERATIONS = 1000
+ITERATIONS = 5000
 RAYLEIGH_SCALE = 2.0
 
 # 0: not visited
 # 1: initial seed
-# 2 .. ITERATIONS: visited by random walk
+# 2 .. ITERATIONS + 2: visited by random walk
 COLORS = ITERATIONS + 2
 
 
@@ -58,24 +58,24 @@ def random_walk(dla, value, levy=False, gravity=False):
                 return
 
 
-def compute_dimensionality(dla):   
-    image = plt.imread(dla)
-
+def compute_dimensionality(dla):
     # Initialize lists to store the log of box sizes and log of box counts
     box_lengths = [1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100]
     log_box_lengths = np.log(box_lengths)
     log_box_counts = []
 
-    # for each box_length in the list, count the number of boxes needed to cover the structure
+    # for each box_length in the list, count the number of boxes needed to
+    # cover the structure
     for box_length in box_lengths:
         box_count = 0
 
-        # For each row and each column, move from index 0 to index[box_length] in intervals of box_length
-        for x in range(0, image.shape[0], box_length):
-            for y in range(0, image.shape[1], box_length):
-
-                # If the box_length by box_length area contains a nonzero element, add 1 to box count
-                if np.any(image[x:x+box_length, y:y+box_length]):
+        # For each row and each column, move from index 0 to index[box_length]
+        # in intervals of box_length
+        for x in range(0, WORLD_SIZE, box_length):
+            for y in range(0, WORLD_SIZE, box_length):
+                # If the box_length by box_length area contains a nonzero
+                # element, add 1 to box count
+                if np.any(dla[x:x+box_length, y:y+box_length]):
                     box_count += 1
 
         log_box_counts.append(np.log(box_count))
@@ -87,14 +87,14 @@ def compute_dimensionality(dla):
     estimated_dimension = -model.coef_[0]
 
     # Plot box_count as a function of box_length in log-log space
-    plt.scatter(log_box_lengths, log_box_counts, label=None)
-    plt.plot(log_box_lengths, model.predict(x), color='purple', label="Linear Fit")
-    plt.xlabel('Log(Box Size)')
-    plt.ylabel('Log(Box Count)')
-    plt.legend()
-    plt.title('')
-    plt.grid(True)
-    plt.show()
+    # plt.scatter(log_box_lengths, log_box_counts, label=None)
+    # plt.plot(log_box_lengths, model.predict(x), color='purple', label="Linear Fit")
+    # plt.xlabel('Log(Box Size)')
+    # plt.ylabel('Log(Box Count)')
+    # plt.legend()
+    # plt.title('')
+    # plt.grid(True)
+    # plt.show()
 
     return estimated_dimension
 
