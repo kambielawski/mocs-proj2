@@ -1,4 +1,5 @@
 from enum import Enum
+import functools
 import math
 import random
 from time import perf_counter
@@ -59,6 +60,18 @@ def random_walk(dla, value, levy=False, gravity=False):
 
 
 def compute_dimensionality(dla):
+    def render_plot(log_box_lengths, log_box_counts, model, filename):
+        # Plot box_count as a function of box_length in log-log space
+        plt.scatter(log_box_lengths, log_box_counts, label=None)
+        plt.plot(log_box_lengths, model.predict(x), color='purple', label="Linear Fit")
+        plt.xlabel('Log(Box Size)')
+        plt.ylabel('Log(Box Count)')
+        plt.legend()
+        plt.title('')
+        plt.grid(True)
+        plt.savefig(filename)
+        plt.close()
+
     # Initialize lists to store the log of box sizes and log of box counts
     box_lengths = [1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100]
     log_box_lengths = np.log(box_lengths)
@@ -86,17 +99,8 @@ def compute_dimensionality(dla):
     model = LinearRegression().fit(x, y)
     estimated_dimension = -model.coef_[0]
 
-    # Plot box_count as a function of box_length in log-log space
-    # plt.scatter(log_box_lengths, log_box_counts, label=None)
-    # plt.plot(log_box_lengths, model.predict(x), color='purple', label="Linear Fit")
-    # plt.xlabel('Log(Box Size)')
-    # plt.ylabel('Log(Box Count)')
-    # plt.legend()
-    # plt.title('')
-    # plt.grid(True)
-    # plt.show()
-
-    return estimated_dimension
+    return estimated_dimension, functools.partial(
+        render_plot, log_box_lengths, log_box_counts, model)
 
 
 def initialize():
@@ -126,7 +130,8 @@ def run_trial(levy=False, gravity=False):
         random_walk(dla, i + 2, levy, gravity)
     save_image(dla, f'dla_{levy:d}_{gravity:d}.png')
     elapsed = perf_counter() - start_time
-    dimensionality = compute_dimensionality(dla)
+    dimensionality, render_chart = compute_dimensionality(dla)
+    render_chart(f'box_count_{levy:d}_{gravity:d}.png')
     return elapsed, dimensionality
 
 
